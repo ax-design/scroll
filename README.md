@@ -1,0 +1,81 @@
+# Scroll
+
+Web component that implements the horizontal scroller of Axiom Design System: a mouse wheel, a touchpad swiped in any direction and the up and down keys scroll it sideways, like the Windows 8 Start screen.
+
+## Installation
+
+```bash
+// with npm
+npm install @ax-design/scroll
+
+// with yarn
+yarn add @ax-design/scroll
+```
+
+and import it:
+
+```javascript
+//CommonJS
+require('@ax-design/scroll').register();
+
+//ESModule
+import { register } from '@ax-design/scroll';
+register();
+```
+
+If you don't use a bundler, load `build/main.js` (it exposes `AxScroll`) or import `build/index.mjs`.
+
+## Usage
+
+```html
+<ax-scroll style="height: 600px">
+  <div style="display: flex; width: max-content">...</div>
+</ax-scroll>
+```
+
+`ax-scroll` is a native horizontal scroller (`overflow-x: auto`), so touch, horizontal touchpad swipes, the scrollbar, the left and right keys, scroll snapping and assistive technology all work as usual. On top of that:
+
+* A vertical mouse wheel scrolls it sideways, with the browser's own smooth scrolling. Quick notches add up.
+* A touchpad swiped up and down scrolls it sideways 1:1, with the touchpad's own momentum.
+* The up and down keys, Page Up and Page Down scroll it sideways.
+* At either end, a wheel gesture goes on to the page, like nested scrollers do.
+* Shift + wheel (already horizontal) and ctrl + wheel (zoom) are left to the browser, and so is a wheel over something inside that scrolls vertically and can still move, or over a form field.
+* Right-to-left layouts scroll the other way.
+
+### How wheel events are told apart
+
+No browser says whether a wheel event comes from a mouse or a touchpad, and on Windows they look the same. So `ax-scroll` does not guess the device; it handles each event by what it looks like, in a way that suits both:
+
+* Events less than 120 ms apart are one gesture, and its first event decides for all of it: mostly sideways is left to the browser, mostly vertical is turned sideways.
+* Steps in lines or pages, and steps of 50 px or more (Chromium sends 100 px a wheel notch), scroll smoothly.
+* Smaller steps (touchpads, high resolution wheels) scroll at once, 1:1.
+
+`WheelSwap`, the class that decides, is exported and has no DOM dependency.
+
+## Attributes
+
+### cross-slide
+
+Touch drags only pan sideways; vertical drags go to the content, for example a tile group that starts dragging a tile on a vertical swipe. Off by default, so a finger still scrolls the page vertically over the scroller.
+
+## Methods
+
+### scrollAlong(delta, smooth)
+
+Scrolls by `delta` px toward the end (negative: toward the start). `smooth` uses the browser's smooth scrolling and adds up with a smooth scroll that is still running.
+
+## Known issues
+
+* Without a touchpad or a mouse at hand, the thresholds (120 ms, 50 px) come from what browsers are documented to send, not from trying every device.
+* In browsers without the `scrollend` event, a smooth scroll is taken as over after 800 ms.
+
+## Development
+
+```bash
+bun install
+bun run build         # es/, build/index.mjs, build/main.js
+bun run check         # type check
+bun test              # wheel decision tests
+bun run test:browser  # browser tests
+bun run demo          # demo page
+```

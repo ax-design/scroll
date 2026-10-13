@@ -1,0 +1,15 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>scroll browser test</title>
+<style>
+  body { margin: 0; padding: 20px; }
+  ax-scroll { width: 400px; height: 120px; margin-bottom: 20px; }
+  .strip { width: 2000px; height: 100px; background: linear-gradient(90deg, #ccd, #dde); position: relative; }
+  .inner { position: absolute; left: 10px; top: 10px; width: 120px; height: 80px; overflow-y: auto; }
+  .inner div { height: 300px; }
+</style></head>
+<body>
+<ax-scroll id="s"><div class="strip"><div class="inner" id="inner"><div></div></div></div></ax-scroll>
+<ax-scroll id="r" dir="rtl"><div class="strip"></div></ax-scroll>
+<ax-scroll id="x" cross-slide><div class="strip"></div></ax-scroll>
+<script type="module" src="./page.ts"></script>
+</body></html>

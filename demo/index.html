@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scroll Demo - Axiom Design System</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { margin: 0; display: flex; flex-direction: column; background: #2b2147; color: #f1eefa; font: 14px/1.45 "Segoe UI", system-ui, -apple-system, sans-serif; }
+  header { flex: none; display: flex; align-items: baseline; gap: 24px; flex-wrap: wrap; padding: 24px 60px 8px; }
+  h1 { font-size: 34px; font-weight: 300; margin: 0; }
+  header p { margin: 0; color: #c9c0e4; max-width: 760px; }
+  header label { color: #d8d1ee; font-size: 13px; display: flex; gap: 6px; align-items: center; }
+
+  /* The scroller fills the rest of the window; the groups take as many rows as it is tall. */
+  ax-scroll { flex: 1; min-height: 0; }
+  .groups { display: flex; gap: 80px; height: 100%; padding: 16px 60px 24px; width: max-content; }
+  .group { display: flex; flex-direction: column; height: 100%; }
+  .group h2 { font-size: 20px; font-weight: 300; margin: 0 0 14px; }
+  ax-tile-group { flex: 1; min-height: 0; --tile-rows: auto; }
+
+  ax-tile { color: #fff; cursor: default; --ax-fill-color: rgba(255, 255, 255, 0.09); --reveal-color: rgb(255, 255, 255); --reveal-opacity: 0.25; }
+  ax-tile .icon { position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; transform: translate(-50%, -50%); pointer-events: none; }
+  ax-tile[rows="1"] .icon { width: 34px; height: 34px; }
+  ax-tile[rows="4"] .icon { width: 96px; height: 96px; }
+  ax-tile .label { position: absolute; left: 8px; bottom: 6px; font-size: 13px; }
+  ax-tile[rows="1"] .label { display: none; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Start</h1>
+  <p>Scroll sideways with anything: a mouse wheel, a touchpad in any direction, the up and down keys, Page Up and Page Down, a finger, or the scrollbar. At either end the wheel goes on to the page.</p>
+  <label><input type="checkbox" id="cross"> Cross-slide (touch: up and down go to the tiles)</label>
+</header>
+<ax-scroll id="scroller" tabindex="0">
+  <div class="groups">
+    <section class="group">
+      <h2>Everyday</h2>
+      <ax-tile-group drag="press" contextmenu>
+      <ax-tile columns="4" rows="2" layers="fill reveal"><img class="icon" alt="" src="../node_modules/@fluentui/svg-icons/icons/mail_48_color.svg"><div class="label">Mail</div></ax-tile>
+      <ax-tile columns="2" rows="2" layers="fill reveal"><img class="icon" alt="" src="../node_modules/@fluentui/svg-icons/icons/calendar_48_color.svg"><div class="label">Calendar</div></ax-tile>
+      <ax-tile columns="2" rows="2" layers="fill reveal"><img class="icon" alt="" src="../node_modules/@fluentui/svg-icons/icons/clock_48_color.svg"><div class="label">Clock</div></ax-tile>
+      <ax-tile columns="4" rows="4" layers="fill reveal"><img class="icon" alt="" src="../node_modules/@fluentui/svg-icons/icons/image_48_color.svg"><div class="label">Photos</div></ax-tile>
+      <ax-tile columns="1" rows="1" layers="fill reveal"><img class="icon" alt="" src="../node_modules/@fluentui/svg-icons/icons/settings_48_color.svg"><div class="label">Settings</div></ax-tile>
+      <ax-tile columns="1" rows="1" layers="fill reveal"><img class="icon" alt="" src="../node_modules/@fluentui/svg-icons/icons/headphones_48_color.svg"><div class="label">Music</div></ax-tile>
+      <ax-tile columns="1" rows="1" layers="fill reveal"><img class="icon" alt="" src="../node_modules/@fluentui/svg-icons/icons/cloud_48_color.svg"><div class="label">OneDrive</div></ax-tile>
+      <ax-tile columns="1" rows="1" layers="fill reveal"><img class="icon" alt="" src="../node_modules/@fluentui/svg-icons/icons/notebook_32_color.svg"><div class="label">Notes</div></ax-tile>
+      <ax-tile columns="4" rows="2" layers="fill reveal"><img class="icon" alt="" src="../node_modules/@fluentui/svg-icons/icons/weather_sunny_low_48_color.svg"><div class="label">Weather</div></ax-tile>
+      <ax-tile columns="2" rows="2" layers="fill reveal"><img class="icon" alt="" src="../node_modules/@fluentui/svg-icons/icons/building_store_24_color.svg"><div class="label">Store</div></ax-tile>
+      </ax-tile-group>
+    </section>
+    <section class="group">
+      <h2>Play</h2>
+      <ax-tile-group drag="press" contextmenu>
+      <ax-tile columns="2" rows="2" layers="fill reveal"><img class="icon" alt="" src="../node_modules/@fluentui/svg-icons/icons/video_48_color.svg"><div class="label">Video</div></ax-tile>
+      <ax-tile columns="2" rows="2" layers="fill reveal"><img class="icon" alt="" src="../node_modules/@fluentui/svg-icons/icons/headphones_48_color.svg"><div class="label">Music</div></ax-tile>
+      <ax-tile columns="4" rows="2" layers="fill reveal"><img class="icon" alt="" src="../node_modules/@fluentui/svg-icons/icons/image_48_color.svg"><div class="label">Camera roll</div></ax-tile>
+      <ax-tile columns="4" rows="4" layers="fill reveal"><img class="icon" alt="" src="../node_modules/@fluentui/svg-icons/icons/video_48_color.svg"><div class="label">Movies</div></ax-tile>
+      <ax-tile columns="2" rows="2" layers="fill reveal"><img class="icon" alt="" src="../node_modules/@fluentui/svg-icons/icons/location_ripple_24_color.svg"><div class="label">Maps</div></ax-tile>
+      <ax-tile columns="2" rows="2" layers="fill reveal"><img class="icon" alt="" src="../node_modules/@fluentui/svg-icons/icons/news_28_color.svg"><div class="label">News</div></ax-tile>
+      </ax-tile-group>
+    </section>
+    <section class="group">
+      <h2>Work</h2>
+      <ax-tile-group drag="press" contextmenu>
+      <ax-tile columns="4" rows="2" layers="fill reveal"><img class="icon" alt="" src="../node_modules/@fluentui/svg-icons/icons/mail_48_color.svg"><div class="label">Outlook</div></ax-tile>
+      <ax-tile columns="2" rows="2" layers="fill reveal"><img class="icon" alt="" src="../node_modules/@fluentui/svg-icons/icons/notebook_32_color.svg"><div class="label">OneNote</div></ax-tile>
+      <ax-tile columns="2" rows="2" layers="fill reveal"><img class="icon" alt="" src="../node_modules/@fluentui/svg-icons/icons/calendar_48_color.svg"><div class="label">Agenda</div></ax-tile>
+      <ax-tile columns="1" rows="1" layers="fill reveal"><img class="icon" alt="" src="../node_modules/@fluentui/svg-icons/icons/clock_48_color.svg"><div class="label">Timer</div></ax-tile>
+      <ax-tile columns="1" rows="1" layers="fill reveal"><img class="icon" alt="" src="../node_modules/@fluentui/svg-icons/icons/settings_48_color.svg"><div class="label">Control</div></ax-tile>
+      <ax-tile columns="1" rows="1" layers="fill reveal"><img class="icon" alt="" src="../node_modules/@fluentui/svg-icons/icons/cloud_48_color.svg"><div class="label">Sync</div></ax-tile>
+      <ax-tile columns="1" rows="1" layers="fill reveal"><img class="icon" alt="" src="../node_modules/@fluentui/svg-icons/icons/news_28_color.svg"><div class="label">Feed</div></ax-tile>
+      <ax-tile columns="4" rows="2" layers="fill reveal"><img class="icon" alt="" src="../node_modules/@fluentui/svg-icons/icons/building_store_24_color.svg"><div class="label">Store</div></ax-tile>
+      <ax-tile columns="2" rows="2" layers="fill reveal"><img class="icon" alt="" src="../node_modules/@fluentui/svg-icons/icons/location_ripple_24_color.svg"><div class="label">Places</div></ax-tile>
+      </ax-tile-group>
+    </section>
+  </div>
+</ax-scroll>
+<script type="module" src="./demo.ts"></script>
+</body>
+</html>
