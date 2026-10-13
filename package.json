@@ -13,7 +13,7 @@
     "sideEffects": false,
     "devDependencies": {
         "@ax-design/reveal-highlight": "^0.6.2",
-        "@ax-design/tile-group": "^0.1.1",
+        "@ax-design/tile-group": "^0.1.2",
         "@fluentui/svg-icons": "1.1.343",
         "@types/bun": "latest",
         "playwright": "^1.64.0",

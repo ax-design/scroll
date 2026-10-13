@@ -6,7 +6,7 @@
       "name": "@ax-design/scroll",
       "devDependencies": {
         "@ax-design/reveal-highlight": "^0.6.2",
-        "@ax-design/tile-group": "^0.1.1",
+        "@ax-design/tile-group": "^0.1.2",
         "@fluentui/svg-icons": "1.1.343",
         "@types/bun": "latest",
         "playwright": "^1.64.0",
@@ -21,7 +21,7 @@
 
     "@ax-design/surface": ["@ax-design/surface@0.2.1", "", { "dependencies": { "@ax-design/shape": "^0.2.0", "@ax-design/typed-om": "^0.1.0" } }, "sha512-rMu0iqxwWnssBg/jYuFFJt5TiKlTqiH8elXBoEHGNugboFzI9R7RyyTZE0tJWW/RDi52dCvX5Z+UEE6iGG2Sow=="],
 
-    "@ax-design/tile-group": ["@ax-design/tile-group@0.1.1", "", { "dependencies": { "@ax-design/shape": "^0.2.0", "@ax-design/surface": "^0.2.1", "@ax-design/typed-om": "^0.1.0" } }, "sha512-iiYgeS6jd89WER3ddrUYbey7sWMtyc3fiF4uYZBTB3hcmTh8KTwT6dEurS47f/zfmdROG44IizHcDmHgudqIyA=="],
+    "@ax-design/tile-group": ["@ax-design/tile-group@0.1.2", "", { "dependencies": { "@ax-design/shape": "^0.2.0", "@ax-design/surface": "^0.2.1", "@ax-design/typed-om": "^0.1.0" } }, "sha512-Z3yqR6eYCNwrS1rAPmfU/4dnfvkGxsKO754ioxqfoiPAFiYLDsXm/I3rrqZFGk7eDLkEao3cfWc9c52ID9yQmA=="],
 
     "@ax-design/typed-om": ["@ax-design/typed-om@0.1.0", "", {}, "sha512-v3I8wDLMFbWDN9cZkDpy9qYonMQfqUU0DIL9DOChTO3dBRzWUk/taZZBUgmNTkA0kvn+g5NbB7pGcSuQAbz9cA=="],
 
