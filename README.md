@@ -58,6 +58,24 @@ No browser says whether a wheel event comes from a mouse or a touchpad, and on W
 
 Touch drags only pan sideways; vertical drags go to the content, for example a tile group that starts dragging a tile on a vertical swipe. Off by default, so a finger still scrolls the page vertically over the scroller.
 
+## Functions
+
+### bindScroll(target, options)
+
+The same scrolling for a scroller of your own, or for the whole page:
+
+```javascript
+import { bindScroll } from '@ax-design/scroll';
+
+// A page laid out sideways: body { overflow-x: auto; overflow-y: hidden; }
+const binding = bindScroll(window);
+
+// Later:
+binding.unbind();
+```
+
+`target` is an element that scrolls horizontally, or `window`. With `{ keys: false }` the up and down keys and Page Up and Page Down are left alone. It returns `{ scrollAlong(delta, smooth), unbind() }`.
+
 ## Methods
 
 ### scrollAlong(delta, smooth)

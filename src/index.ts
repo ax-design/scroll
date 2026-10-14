@@ -3,6 +3,8 @@
 import { AxScroll } from './scroll.js';
 
 export { AxScroll } from './scroll.js';
+export { bindScroll } from './bind.js';
+export type { BindOptions, ScrollBinding } from './bind.js';
 export { GESTURE_GAP, LARGE_STEP, LINE, WheelSwap } from './wheel.js';
 export type { WheelContext, WheelDecision, WheelInput } from './wheel.js';
 

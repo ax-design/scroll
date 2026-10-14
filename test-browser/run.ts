@@ -6,7 +6,7 @@ const dir = import.meta.dir;
 const dist = join(dir, 'dist');
 if (!process.env.SKIP_BUILD) {
     // Sibling packages resolve to their sources through the `source` export condition.
-    const result = await Bun.build({ entrypoints: [join(dir, 'page.html')], outdir: dist, conditions: ['source'] });
+    const result = await Bun.build({ entrypoints: [join(dir, 'page.html'), join(dir, 'window.html')], outdir: dist, conditions: ['source'] });
     if (!result.success) throw new Error(result.logs.join('\n'));
 }
 const server = Bun.serve({
@@ -89,8 +89,9 @@ async function drive(d: Driver) {
 
 let failed = 0;
 for (const name of process.argv.slice(2).length ? process.argv.slice(2) : ['chromium']) {
-    for (const mode of ['default']) {
-        const url = `http://127.0.0.1:${server.port}/`;
+    // default: <ax-scroll> (page.html); window: bindScroll(window) (window.html).
+    for (const mode of ['default', 'window']) {
+        const url = `http://127.0.0.1:${server.port}/${mode === 'window' ? 'window.html' : ''}`;
         const d = name === 'safari' ? await safari(url) : await playwright(name, url);
         let result: any;
         try {
