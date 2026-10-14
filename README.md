@@ -1,6 +1,14 @@
-# Scroll
+<h1 align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/ax-design/scroll/master/docs/logo-r.png">
+    <img src="https://raw.githubusercontent.com/ax-design/scroll/master/docs/logo.png" alt="Ax Pressure">
+  </picture>
+</h1>
 
-Web component that implements the horizontal scroller of Axiom Design System: a mouse wheel, a touchpad swiped in any direction and the up and down keys scroll it sideways, like the Windows 8 Start screen.
+
+<p align="center">
+  Web component that implements Horizontal Scrolling Container of Axiom Design System.
+</p>
 
 ## Installation
 
