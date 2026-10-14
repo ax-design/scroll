@@ -87,6 +87,10 @@ Scrolls by `delta` px toward the end (negative: toward the start). `smooth` uses
 * Without a touchpad or a mouse at hand, the thresholds (120 ms, 50 px) come from what browsers are documented to send, not from trying every device.
 * In browsers without the `scrollend` event, a smooth scroll is taken as over after 800 ms.
 
+## Changes
+
+* 0.1.1: `bindScroll(target)`, the same scrolling for any scroller or for the whole page.
+
 ## Development
 
 ```bash
