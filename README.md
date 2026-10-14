@@ -88,6 +88,7 @@ Scrolls by `delta` px toward the end (negative: toward the start). `smooth` glid
 
 ## Changes
 
+* 0.1.2: a wheel spin keeps gliding instead of starting over at every notch, which stuttered in Chromium.
 * 0.1.1: `bindScroll(target)`, the same scrolling for any scroller or for the whole page.
 
 ## Development
