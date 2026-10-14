@@ -35,7 +35,7 @@ If you don't use a bundler, load `build/main.js` (it exposes `AxScroll`) or impo
 
 `ax-scroll` is a native horizontal scroller (`overflow-x: auto`), so touch, horizontal touchpad swipes, the scrollbar, the left and right keys, scroll snapping and assistive technology all work as usual. On top of that:
 
-* A vertical mouse wheel scrolls it sideways, with the browser's own smooth scrolling. Quick notches add up.
+* A vertical mouse wheel scrolls it sideways with a glide of its own. Quick notches add up, and a spin keeps moving instead of starting over at every notch.
 * A touchpad swiped up and down scrolls it sideways 1:1, with the touchpad's own momentum.
 * The up and down keys, Page Up and Page Down scroll it sideways.
 * At either end, a wheel gesture goes on to the page, like nested scrollers do.
@@ -80,12 +80,11 @@ binding.unbind();
 
 ### scrollAlong(delta, smooth)
 
-Scrolls by `delta` px toward the end (negative: toward the start). `smooth` uses the browser's smooth scrolling and adds up with a smooth scroll that is still running.
+Scrolls by `delta` px toward the end (negative: toward the start). `smooth` glides there and adds up with a glide that is still running.
 
 ## Known issues
 
 * Without a touchpad or a mouse at hand, the thresholds (120 ms, 50 px) come from what browsers are documented to send, not from trying every device.
-* In browsers without the `scrollend` event, a smooth scroll is taken as over after 800 ms.
 
 ## Changes
 
@@ -97,7 +96,7 @@ Scrolls by `delta` px toward the end (negative: toward the start). `smooth` uses
 bun install
 bun run build         # es/, build/index.mjs, build/main.js
 bun run check         # type check
-bun test              # wheel decision tests
+bun test              # wheel decision and glide tests
 bun run test:browser  # browser tests
 bun run demo          # demo page
 ```

@@ -46,6 +46,17 @@ async function run() {
     await settle();
     check('quick notches add up', Math.round(s.scrollLeft) === 400, String(s.scrollLeft));
 
+    // A quick spin keeps up: it does not wait for one notch's glide to end before the next.
+    const spinFrom = s.scrollLeft;
+    for (let i = 0; i < 8; i++) {
+        wheel(strip, 100);
+        await wait(25);
+    }
+    const spun = s.scrollLeft - spinFrom;
+    await settle();
+    check('a quick spin keeps up while the wheel turns', spun >= 400, Math.round(spun) + ' px of 800');
+    check('and the spin adds up to all of it', Math.round(s.scrollLeft) === spinFrom + 800, String(s.scrollLeft));
+
     // Small steps move at once.
     const before = s.scrollLeft;
     wheel(strip, 6);

@@ -1,18 +1,19 @@
 // bindScroll: the vertical-to-horizontal scrolling of <ax-scroll> for any horizontal scroller,
 // or for the page itself (bindScroll(window)). See wheel.ts for how wheel events are told apart.
+import { nextStep } from './smooth.js';
 import { WheelSwap } from './wheel.js';
 
 // Up and down keys move this many px; Page Up and Page Down this part of the width.
 const KEY_STEP = 40;
 const PAGE_PART = 0.875;
-// A smooth scroll that reports no end (no scrollend event) is taken as over after this.
-const SMOOTH_TIMEOUT = 800;
+// Keys the browser scrolls on its own: they end a glide of ours.
+const NATIVE_KEYS = /^(ArrowLeft|ArrowRight|Home|End)$/;
 
 const EDITABLE = /^(INPUT|TEXTAREA|SELECT)$/;
 
 export interface ScrollBinding {
-    // Scrolls by `delta` px toward the end (negative: toward the start). `smooth` uses the
-    // browser's smooth scrolling and adds up with a smooth scroll that is still running.
+    // Scrolls by `delta` px toward the end (negative: toward the start). `smooth` glides there and
+    // adds up with a glide that is still running.
     scrollAlong(delta: number, smooth: boolean): void;
     // Removes the listeners.
     unbind(): void;
@@ -32,10 +33,12 @@ export function bindScroll(target: HTMLElement | Window, options: BindOptions = 
     // Where the events are listened to: anywhere on the page for a page.
     const events: EventTarget = target;
     const swap = new WheelSwap();
-    // Where a smooth scroll that is still running goes: the next wheel step adds to it, so a
-    // fast spin does not lose the part of a step that was not scrolled yet.
+    // Where a glide that is still running goes: the next wheel step adds to it, so a fast spin
+    // does not lose the part of a step that was not scrolled yet.
     let goal: number | null = null;
-    let goalTimer = 0;
+    // The frame of the glide that is running, 0 when none is.
+    let frame = 0;
+    let lastFrame = 0;
 
     // +1 when scrolling toward the end raises scrollLeft, -1 in right-to-left layouts, where
     // scrollLeft runs from 0 down to minus the scroll width.
@@ -51,8 +54,30 @@ export function bindScroll(target: HTMLElement | Window, options: BindOptions = 
     };
 
     const endSmooth = () => {
-        window.clearTimeout(goalTimer);
+        if (frame) window.cancelAnimationFrame(frame);
+        frame = 0;
+        lastFrame = 0;
         goal = null;
+    };
+
+    // One frame of the glide toward `goal`, each closing a share of what is left. A wheel step that
+    // arrives on the way only moves the target, so the scroller keeps the speed it has;
+    // scrollTo({ behavior: 'smooth' }) would instead start over from a standstill on every call,
+    // which is what makes a spin stutter in Chromium.
+    const glide = (time: number) => {
+        frame = 0;
+        if (goal === null) return;
+        const to = Math.max(0, Math.min(max(), goal));
+        const from = position();
+        const dt = lastFrame ? Math.min(100, time - lastFrame) : 16.7;
+        lastFrame = time;
+        const step = nextStep(from, to, dt);
+        scroller.scrollLeft = sign() * step.at;
+        if (step.done) {
+            endSmooth();
+            return;
+        }
+        frame = window.requestAnimationFrame(glide);
     };
 
     const scrollAlong = (delta: number, smooth: boolean) => {
@@ -60,9 +85,10 @@ export function bindScroll(target: HTMLElement | Window, options: BindOptions = 
         const clamp = (n: number) => Math.max(0, Math.min(limit, n));
         if (smooth || goal !== null) {
             goal = clamp((goal !== null ? goal : position()) + delta);
-            scroller.scrollTo({ left: sign() * goal, behavior: 'smooth' });
-            window.clearTimeout(goalTimer);
-            goalTimer = window.setTimeout(endSmooth, SMOOTH_TIMEOUT);
+            if (!frame) {
+                lastFrame = 0;
+                frame = window.requestAnimationFrame(glide);
+            }
         } else {
             scroller.scrollLeft = sign() * clamp(position() + delta);
         }
@@ -88,7 +114,12 @@ export function bindScroll(target: HTMLElement | Window, options: BindOptions = 
         const e = event as WheelEvent;
         if (e.defaultPrevented) return;
         const decision = swap.decide(e, { page: width() * PAGE_PART, canScroll, nestedTakes: (dy) => nestedTakes(e, dy) });
-        if (decision.action !== 'scroll') return;
+        if (decision.action !== 'scroll') {
+            // Sideways, a nested scroller or an edge: the browser has this one, and a glide of
+            // ours yields to it.
+            if (goal !== null) endSmooth();
+            return;
+        }
         e.preventDefault();
         scrollAlong(decision.delta, decision.smooth);
     };
@@ -98,6 +129,11 @@ export function bindScroll(target: HTMLElement | Window, options: BindOptions = 
         if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
         const from = e.composedPath()[0] as HTMLElement | undefined;
         if (from && (EDITABLE.test(from.tagName) || from.isContentEditable)) return;
+        if (NATIVE_KEYS.test(e.key)) {
+            // The browser scrolls this one, and a glide of ours yields to it.
+            if (goal !== null) endSmooth();
+            return;
+        }
         let delta = 0;
         if (e.key === 'ArrowDown') delta = KEY_STEP;
         else if (e.key === 'ArrowUp') delta = -KEY_STEP;
@@ -108,11 +144,6 @@ export function bindScroll(target: HTMLElement | Window, options: BindOptions = 
         scrollAlong(delta, true);
     };
 
-    // scrollend of the page's scrolling arrives at the document.
-    const endTarget: EventTarget = page ? document : scroller;
-    const onScrollEnd = () => {
-        if (goal !== null && Math.abs(position() - goal) < 1) endSmooth();
-    };
     // Any other way of scrolling ends ours.
     const onOtherInput = () => {
         endSmooth();
@@ -123,7 +154,6 @@ export function bindScroll(target: HTMLElement | Window, options: BindOptions = 
     // Not passive: the converted events must not also scroll the page vertically.
     events.addEventListener('wheel', onWheel, { passive: false } as AddEventListenerOptions);
     if (keys) events.addEventListener('keydown', onKeyDown);
-    endTarget.addEventListener('scrollend', onScrollEnd);
     events.addEventListener('pointerdown', onOtherInput);
     events.addEventListener('touchstart', onOtherInput, { passive: true } as AddEventListenerOptions);
 
@@ -132,7 +162,6 @@ export function bindScroll(target: HTMLElement | Window, options: BindOptions = 
         unbind() {
             events.removeEventListener('wheel', onWheel);
             if (keys) events.removeEventListener('keydown', onKeyDown);
-            endTarget.removeEventListener('scrollend', onScrollEnd);
             events.removeEventListener('pointerdown', onOtherInput);
             events.removeEventListener('touchstart', onOtherInput);
             endSmooth();
