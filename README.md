@@ -88,7 +88,7 @@ binding.unbind();
 
 ### scrollAlong(delta, smooth)
 
-Scrolls by `delta` px toward the end (negative: toward the start). `smooth` glides there and adds up with a glide that is still running.
+Scrolls by `delta` px toward the end (negative: toward the start). `smooth` glides there and adds up with a glide that is still running. When the user asks for reduced motion (`prefers-reduced-motion: reduce`), `smooth` is ignored and the scroll jumps.
 
 ## Known issues
 

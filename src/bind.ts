@@ -11,9 +11,15 @@ const NATIVE_KEYS = /^(ArrowLeft|ArrowRight|Home|End)$/;
 
 const EDITABLE = /^(INPUT|TEXTAREA|SELECT)$/;
 
+// Read at each call, so a change of the setting applies without re-binding. Without matchMedia
+// the motion is not reduced.
+const reducedMotion = (): boolean =>
+    typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 export interface ScrollBinding {
     // Scrolls by `delta` px toward the end (negative: toward the start). `smooth` glides there and
-    // adds up with a glide that is still running.
+    // adds up with a glide that is still running. Under prefers-reduced-motion: reduce `smooth` is
+    // ignored and the scroll jumps.
     scrollAlong(delta: number, smooth: boolean): void;
     // Removes the listeners.
     unbind(): void;
@@ -83,6 +89,13 @@ export function bindScroll(target: HTMLElement | Window, options: BindOptions = 
     const scrollAlong = (delta: number, smooth: boolean) => {
         const limit = max();
         const clamp = (n: number) => Math.max(0, Math.min(limit, n));
+        if (reducedMotion()) {
+            // Jump where a glide that is running was heading, not where the scroller is on its way.
+            const to = clamp((goal !== null ? goal : position()) + delta);
+            endSmooth();
+            scroller.scrollLeft = sign() * to;
+            return;
+        }
         if (smooth || goal !== null) {
             goal = clamp((goal !== null ? goal : position()) + delta);
             if (!frame) {

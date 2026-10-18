@@ -26,10 +26,11 @@ interface Driver {
     close(): Promise<void>;
 }
 
-async function playwright(name: string, url: string): Promise<Driver> {
+async function playwright(name: string, url: string, reduced = false): Promise<Driver> {
     const pw = (await import('playwright')) as any;
     const browser = await pw[name].launch();
     const page = await browser.newPage({ viewport: { width: 700, height: 900 } });
+    if (reduced) await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto(url);
     return {
         eval: (script) => page.evaluate(script),
@@ -90,9 +91,16 @@ async function drive(d: Driver) {
 let failed = 0;
 for (const name of process.argv.slice(2).length ? process.argv.slice(2) : ['chromium']) {
     // default: <ax-scroll> (page.html); window: bindScroll(window) (window.html).
-    for (const mode of ['default', 'window']) {
-        const url = `http://127.0.0.1:${server.port}/${mode === 'window' ? 'window.html' : ''}`;
-        const d = name === 'safari' ? await safari(url) : await playwright(name, url);
+    // 'default reduced' emulates reduced motion, which the Safari driver cannot, so Safari skips it.
+    const runs = [
+        { mode: 'default', page: '', reduced: false },
+        { mode: 'window', page: 'window.html', reduced: false },
+        { mode: 'default reduced', page: '', reduced: true },
+    ];
+    for (const { mode, page, reduced } of runs) {
+        if (reduced && name === 'safari') continue;
+        const url = `http://127.0.0.1:${server.port}/${page}`;
+        const d = name === 'safari' ? await safari(url) : await playwright(name, url, reduced);
         let result: any;
         try {
             result = await drive(d);

@@ -106,6 +106,23 @@ async function run() {
     wheel(r.firstElementChild!, 100);
     await settle();
     check('right to left scrolls the other way', Math.round(r.scrollLeft) === -100, String(r.scrollLeft));
+    await settle();
+
+    // Reduced motion (emulated for one run in run.ts): a notch and an arrow key jump; otherwise they glide.
+    s.scrollLeft = 0;
+    await wait(50);
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    wheel(strip, 100);
+    const notch = s.scrollLeft;
+    s.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true, composed: true }));
+    const key = s.scrollLeft;
+    check(
+        reduced ? 'reduced motion: a notch and an arrow key jump at once' : 'without reduced motion a notch and an arrow key glide',
+        reduced ? notch === 100 && key === 140 : notch === 0 && key === 0,
+        `${notch}, ${key}`
+    );
+    await settle();
+    check('and both end on their target', Math.round(s.scrollLeft) === 140, String(s.scrollLeft));
 
     // Keys.
     s.scrollLeft = 0;
