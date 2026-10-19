@@ -50,6 +50,20 @@ If you don't use a bundler, load `build/main.js` (it exposes `AxScroll`) or impo
 * Shift + wheel (already horizontal) and ctrl + wheel (zoom) are left to the browser, and so is a wheel over something inside that scrolls vertically and can still move, or over a form field.
 * Right-to-left layouts scroll the other way.
 
+### Keyboard focus
+
+The up and down keys scroll `ax-scroll` only while it has focus. When nothing inside it can take focus (no link, button, form field or other `tabindex`), `ax-scroll` gives itself `tabindex="0"`, so the keys reach it in every browser. The attribute goes again as soon as focusable content appears, and it is never touched when you set a `tabindex` yourself.
+
+A focusable scroller should also say what it is, so that a screen reader announces it. Give it a role and a name:
+
+```html
+<ax-scroll role="region" aria-label="Featured tiles" style="height: 600px">
+  <div style="display: flex; width: max-content">...</div>
+</ax-scroll>
+```
+
+`aria-labelledby` works the same way, pointing at a visible heading. The component adds no role itself.
+
 ### How wheel events are told apart
 
 No browser says whether a wheel event comes from a mouse or a touchpad, and on Windows they look the same. So `ax-scroll` does not guess the device; it handles each event by what it looks like, in a way that suits both:
@@ -96,6 +110,7 @@ Scrolls by `delta` px toward the end (negative: toward the start). `smooth` glid
 
 ## Changes
 
+* Unreleased: `ax-scroll` takes focus with `tabindex="0"` while nothing inside it can, so the keys work without a focusable child (Safari and older engines).
 * 0.1.2: a wheel spin keeps gliding instead of starting over at every notch, which stuttered in Chromium.
 * 0.1.1: `bindScroll(target)`, the same scrolling for any scroller or for the whole page.
 
