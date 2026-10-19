@@ -23,12 +23,16 @@ interface Driver {
     move(x: number, y: number): Promise<void>;
     down(): Promise<void>;
     up(): Promise<void>;
+    // A real key press (Playwright only).
+    key?(name: string): Promise<void>;
     close(): Promise<void>;
 }
 
 async function playwright(name: string, url: string, reduced = false): Promise<Driver> {
     const pw = (await import('playwright')) as any;
-    const browser = await pw[name].launch();
+    // AX_BROWSER_PATH points the run at a system build instead.
+    const executablePath = process.env.AX_BROWSER_PATH;
+    const browser = await pw[name].launch(executablePath ? { executablePath } : {});
     const page = await browser.newPage({ viewport: { width: 700, height: 900 } });
     if (reduced) await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto(url);
@@ -37,6 +41,7 @@ async function playwright(name: string, url: string, reduced = false): Promise<D
         move: (x, y) => page.mouse.move(x, y),
         down: () => page.mouse.down(),
         up: () => page.mouse.up(),
+        key: (name) => page.keyboard.press(name),
         close: () => browser.close(),
     };
 }
@@ -81,6 +86,9 @@ async function drive(d: Driver) {
                 await d.down();
             } else if (state.step === 'release') {
                 await d.up();
+            } else if (state.step.indexOf('key:') === 0 && d.key) {
+                // 'key:Tab:1': the page waits for the ack before it reads the result.
+                await d.key(state.step.split(':')[1]);
             }
             await d.eval(`(window.__ack = ${JSON.stringify(state.step)})`);
         }
@@ -100,7 +108,8 @@ for (const name of process.argv.slice(2).length ? process.argv.slice(2) : ['chro
     for (const { mode, page, reduced } of runs) {
         if (reduced && name === 'safari') continue;
         const url = `http://127.0.0.1:${server.port}/${page}`;
-        const d = name === 'safari' ? await safari(url) : await playwright(name, url, reduced);
+        // ?keys: the page makes real key presses, which only the Playwright driver can do.
+        const d = name === 'safari' ? await safari(url) : await playwright(name, url + '?keys', reduced);
         let result: any;
         try {
             result = await drive(d);

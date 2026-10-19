@@ -12,6 +12,9 @@ interface Check {
 declare global {
     interface Window {
         __result?: unknown;
+        // Key presses: the page sets __step, run.ts acks it once the key is pressed.
+        __step?: string;
+        __ack?: string;
     }
 }
 
@@ -27,6 +30,30 @@ const wheel = (target: Element, deltaY: number, extra: WheelEventInit = {}) => {
 };
 // Waits for a gesture to end (wheel.ts GESTURE_GAP) and for smooth scrolling to settle.
 const settle = () => wait(900);
+// MutationObserver callbacks run before the next task; 20 ms is more than enough.
+const settled = () => wait(20);
+
+// A real key press through the driver. Only Playwright makes them: the page asks for them with
+// ?keys, so Safari skips the checks that need one.
+let pressed = 0;
+const press = async (key: string) => {
+    const step = `key:${key}:${++pressed}`;
+    window.__step = step;
+    for (let i = 0; window.__ack !== step; i++) {
+        if (i > 500) throw new Error(`no ack for ${step}`);
+        await wait(20);
+    }
+};
+const realKeys = new URLSearchParams(location.search).has('keys');
+
+// A link added to, or removed from, a scroller.
+const addLink = (scroller: Element) => {
+    const link = document.createElement('a');
+    link.href = '#';
+    link.textContent = 'Link';
+    scroller.firstElementChild!.appendChild(link);
+    return link;
+};
 
 async function run() {
     register();
@@ -136,6 +163,66 @@ async function run() {
 
     // cross-slide leaves vertical touch drags to the content.
     check('cross-slide pans sideways only', /pan-x/.test(getComputedStyle(byId('x')).touchAction) && !/pan-x/.test(getComputedStyle(s).touchAction), getComputedStyle(byId('x')).touchAction);
+
+    // Keyboard focus: a scroller with nothing focusable in it takes the focus itself.
+    const t = byId('t');
+    const l = byId('l');
+    check('a scroller with only text gets tabindex 0', t.getAttribute('tabindex') === '0', String(t.getAttribute('tabindex')));
+    check('a scroller with a link gets no tabindex', !l.hasAttribute('tabindex'), String(l.getAttribute('tabindex')));
+    if (realKeys) {
+        // Tab from the button before it lands on the scroller, and the down key then scrolls it.
+        byId('before').focus();
+        await press('Tab');
+        check('Tab from a button before it focuses the scroller', document.activeElement === t, String(document.activeElement && document.activeElement.id));
+        await press('ArrowDown');
+        await settle();
+        check('the down key then scrolls it sideways', Math.round(t.scrollLeft) === 40, String(t.scrollLeft));
+        t.scrollLeft = 0;
+        await wait(50);
+    }
+
+    // A link added later takes the tabindex away, and removing it gives the tabindex back.
+    const link = addLink(t);
+    await settled();
+    check('a link added later removes the tabindex', !t.hasAttribute('tabindex'), String(t.getAttribute('tabindex')));
+    link.remove();
+    await settled();
+    check('removing the link gives the tabindex back', t.getAttribute('tabindex') === '0', String(t.getAttribute('tabindex')));
+    // Removed from the page, the scroller removes its own tabindex, and gives it back when it returns.
+    const parent = t.parentNode!;
+    const next = t.nextSibling;
+    t.remove();
+    check('on disconnect the own tabindex is removed', !t.hasAttribute('tabindex'), String(t.getAttribute('tabindex')));
+    parent.insertBefore(t, next);
+    await settled();
+    check('and back on connect', t.getAttribute('tabindex') === '0', String(t.getAttribute('tabindex')));
+
+    const linkInL = l.querySelector('a')!;
+    linkInL.remove();
+    await settled();
+    check('a link removed from a scroller gives it a tabindex', l.getAttribute('tabindex') === '0', String(l.getAttribute('tabindex')));
+    l.appendChild(linkInL);
+    await settled();
+    check('and a link added back takes it away again', !l.hasAttribute('tabindex'), String(l.getAttribute('tabindex')));
+
+    // The author's tabindex is theirs: kept through changes and on disconnect.
+    for (const [id, value] of [['own-neg', '-1'], ['own-zero', '0']]) {
+        const own = byId(id);
+        const ownLink = addLink(own);
+        await settled();
+        ownLink.remove();
+        await settled();
+        check(`author tabindex ${value} is kept through link changes`, own.getAttribute('tabindex') === value, String(own.getAttribute('tabindex')));
+        const parentOwn = own.parentNode!;
+        const nextOwn = own.nextSibling;
+        own.remove();
+        await settled();
+        check(`author tabindex ${value} is kept on disconnect`, own.getAttribute('tabindex') === value, String(own.getAttribute('tabindex')));
+        parentOwn.insertBefore(own, nextOwn);
+        addLink(own);
+        await settled();
+        check(`author tabindex ${value} is kept after a link is added`, own.getAttribute('tabindex') === value, String(own.getAttribute('tabindex')));
+    }
 
     return { userAgent: navigator.userAgent, checks };
 }
