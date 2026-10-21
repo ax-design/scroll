@@ -108,11 +108,9 @@ Scrolls by `delta` px toward the end (negative: toward the start). `smooth` glid
 
 * Without a touchpad or a mouse at hand, the thresholds (120 ms, 50 px) come from what browsers are documented to send, not from trying every device.
 
-## Changes
+## Changelog
 
-* 0.2.0: `ax-scroll` takes focus with `tabindex="0"` while nothing inside it can, so the keys work without a focusable child (Safari and older engines).
-* 0.1.2: a wheel spin keeps gliding instead of starting over at every notch, which stuttered in Chromium.
-* 0.1.1: `bindScroll(target)`, the same scrolling for any scroller or for the whole page.
+See [CHANGELOG.md](CHANGELOG.md).
 
 ## Development
 
