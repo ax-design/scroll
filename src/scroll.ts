@@ -46,7 +46,10 @@ function hasFocusableContent(host: Element): boolean {
 const template = typeof document !== 'undefined' ? document.createElement('template') : null;
 if (template) template.innerHTML = `<style>${STYLE}</style><slot></slot>`;
 
-export class AxScroll extends HTMLElement {
+// Server-side rendering imports this module without a DOM.
+const ElementBase: typeof HTMLElement = typeof HTMLElement !== 'undefined' ? HTMLElement : (class {} as unknown as typeof HTMLElement);
+
+export class AxScroll extends ElementBase {
     static readonly ElementName: string = 'ax-scroll';
 
     private binding: ScrollBinding | null = null;

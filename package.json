@@ -1,6 +1,6 @@
 {
     "name": "@ax-design/scroll",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "description": "Web component that implements the horizontal scroller of Axiom Design System: vertical wheels, touchpads and keys scroll it sideways, like the Windows 8 Start screen.",
     "main": "build/main.js",
     "module": "es/index.js",
